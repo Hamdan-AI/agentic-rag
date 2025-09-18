@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+pypdf
+tiktoken
+openai>=1.0.0
+pinecone>=5.0.0
+langchain>=0.2.0
+langgraph>=0.2.0
+python-multipart
