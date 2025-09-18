@@ -22,6 +22,7 @@ OVERLAP = 200
 class AddFileResponse(BaseModel):
     file_id: str
     chunks: int
+    message: str | None = None  # <-- added
 
 @router.post("/add_file", response_model=AddFileResponse)
 async def add_file(file: UploadFile = File(...)):
@@ -85,7 +86,7 @@ async def add_file(file: UploadFile = File(...)):
             log.error("Ingestion (chunk/embed/upsert) failed:\n" + traceback.format_exc())
             raise HTTPException(status_code=500, detail=f"Ingestion failed: {e}")
 
-        return AddFileResponse(file_id=fid, chunks=chunks_count)
+        return AddFileResponse(file_id=fid, chunks=chunks_count, message="File indexed successfully")
 
     except HTTPException:
         raise
@@ -97,7 +98,7 @@ async def add_file(file: UploadFile = File(...)):
 async def delete_file(file_id: str):
     try:
         delete_by_file_id(file_id)
-        return {"status": "deleted", "file_id": file_id}
+        return {"status": "deleted", "file_id": file_id, "message": "Vectors deleted successfully"}  # <-- message added
     except Exception as e:
         log.error("Delete failed:\n" + traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Delete failed: {e}")
@@ -131,7 +132,7 @@ async def update_file(file_id: str, file: UploadFile = File(...)):
             embs = embed_texts([x["text"] for x in batch_vecs])
             upsert_text_vectors(batch_vecs, embs)
 
-        return AddFileResponse(file_id=file_id, chunks=chunks_count)
+        return AddFileResponse(file_id=file_id, chunks=chunks_count, message="File re-indexed successfully")  # <-- message added
     except HTTPException:
         raise
     except Exception as e:
